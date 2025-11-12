@@ -67,6 +67,9 @@ export const Login = async (req, res) => {
     const accessToken = generateAccessToken(existingUser);
     const refreshToken = generateRefreshToken(existingUser);
 
+    existingUser.refreshToken = refreshToken;
+    await existingUser.save();
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -106,7 +109,8 @@ export const refresh = async (req, res) => {
 
   try {
     const payload = verifyRefreshToken(token);
-    const user = await User.findById(payload.userId);
+    const user = await User.findById(payload.userId).select("+refreshToken");
+    //const user = await User.findById(payload.userId);
     if (!user || user.refreshToken !== token)
       return res.status(403).json({ error: "Invalid refresh token" });
 
