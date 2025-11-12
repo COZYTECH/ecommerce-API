@@ -15,8 +15,8 @@ export const register = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ error: "Email already in use" });
     }
-
-    const hashedPassword = doHash(password, 10); // Replace with actual hashing logic
+    // hashing the user password
+    const hashedPassword = await doHash(password, 10); // Replace with actual hashing logic
     const newUser = new User({
       username,
       email,
