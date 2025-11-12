@@ -32,6 +32,7 @@ export const userDataSchema = new mongoose.Schema(
       min: 10,
       max: 100,
     },
+    refreshToken: { type: String },
   },
   { timestamps: true }
 );
