@@ -1,6 +1,7 @@
 import {
   registerSchema,
   loginSchema,
+  changePasswordSchema,
 } from "../middleware/schema.validation.js";
 import User from "../models/user.model.js";
 import doHash from "../lib/hash.js";
@@ -16,6 +17,8 @@ export const register = async (req, res) => {
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
+  //  Remove role if attacker sends it
+  if (req.body.role) delete req.body.role;
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -35,9 +38,12 @@ export const register = async (req, res) => {
     });
     const result = await newUser.save();
     result.password = undefined;
-    res
-      .status(201)
-      .json({ success: true, message: "user created successfully", result });
+    res.status(201).json({
+      success: true,
+      message: "user created successfully",
+      result,
+      role: User.role,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Server error" });
@@ -51,6 +57,8 @@ export const Login = async (req, res) => {
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
+
+  if (req.body.role) delete req.body.role;
   try {
     const existingUser = await User.findOne({ email }).select("+password");
     if (!existingUser) {
@@ -79,7 +87,11 @@ export const Login = async (req, res) => {
 
     res.json({
       accessToken,
-      user: { email: existingUser.email, username: existingUser.username },
+      user: {
+        email: existingUser.email,
+        username: existingUser.username,
+        role: User.role,
+      },
     });
 
     // const token = jwt.sign(
@@ -118,5 +130,39 @@ export const refresh = async (req, res) => {
     res.json({ accessToken });
   } catch (err) {
     return res.status(403).json({ error: "Invalid token" });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  const userId = req.user.userId;
+  const { oldPassword, newPassword } = req.body;
+
+  try {
+    const { error } = changePasswordSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+    const existingUser = await User.findById(userId).select("+password");
+    if (!existingUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const isOldPasswordValid = await doHashValidation(
+      oldPassword,
+      existingUser.password
+    );
+    if (!isOldPasswordValid) {
+      return res.status(400).json({ error: "Old password is incorrect" });
+    }
+    const hashedNewPassword = await doHash(newPassword, 10);
+    existingUser.password = hashedNewPassword;
+    await existingUser.save();
+    res.json({
+      success: true,
+      message: "Password changed successfully",
+      role: User.role,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Server error" });
   }
 };
