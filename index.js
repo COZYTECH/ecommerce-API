@@ -4,6 +4,7 @@ import connectDB from "./config/db.config.js";
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.route.js";
 import productRoutes from "./routes/create.product.route.js";
+
 await connectDB();
 
 const app = express();

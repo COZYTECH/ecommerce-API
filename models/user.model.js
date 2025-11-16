@@ -4,7 +4,9 @@ export const userDataSchema = new mongoose.Schema(
   {
     username: {
       type: String,
-      required: true,
+      required: function () {
+        return this.role !== "superadmin";
+      },
       trim: true,
       unique: true,
       min: 3,
@@ -27,13 +29,34 @@ export const userDataSchema = new mongoose.Schema(
     },
     address: {
       type: String,
-      required: true,
+      // required: function () {
+      //   return this.role !== "superadmin" && this.role !== "admin";
+      // },
+      // required: function () {
+      //   const role = this.role ? this.role.toLowerCase() : "user";
+      //   const optionalRoles = ["superadmin", "admin"];
+      //   return !optionalRoles.includes(role);
+      // },
+
+      required: function () {
+        // Only required on new documents
+        if (!this.isNew) return false;
+
+        const role = this.role ? this.role.toLowerCase() : "user";
+        const optionalRoles = ["superadmin", "admin"];
+        return !optionalRoles.includes(role);
+      },
       trim: true,
       min: 10,
       max: 100,
     },
     refreshToken: { type: String },
-    role: { type: String, enum: ["user", "admin"], default: "user" },
+    role: {
+      type: String,
+      enum: ["user", "superadmin", "admin"],
+      default: "user",
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -6,6 +6,7 @@ import {
   changePassword,
 } from "../controller/auth.controller.js";
 import { verifyToken } from "../middleware/verify.token.js";
+import authorizeRoles from "../middleware/admin.verification.js";
 
 const router = express.Router();
 
