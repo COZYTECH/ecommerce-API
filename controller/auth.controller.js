@@ -12,7 +12,7 @@ import { verifyAccessToken, verifyRefreshToken } from "../lib/jwt.js";
 export const register = async (req, res) => {
   // Registration logic here
 
-  const { username, email, password, address, repeatPassword } = req.body;
+  const { username, email, password, address } = req.body;
   const { error } = registerSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });

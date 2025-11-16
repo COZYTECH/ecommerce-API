@@ -4,5 +4,10 @@ import authorizeRoles from "../middleware/admin.verification.js";
 import { verifyToken } from "../middleware/verify.token.js";
 
 const router = express.Router();
-router.post("/create-product", verifyToken, authorizeRoles, createProduct);
+router.post(
+  "/create-product",
+  verifyToken,
+  authorizeRoles("superadmin", "admin"),
+  createProduct
+);
 export default router;

@@ -7,8 +7,9 @@ import doHash from "../lib/hash.js";
 import { doHashValidation } from "../lib/hash.js";
 import { generateAccessToken } from "../lib/jwt.js";
 import { generateRefreshToken } from "../lib/jwt.js";
+import User from "../models/user.model.js";
 
-export const superAdmin = async (req, res) => {
+export const createAdmin = async (req, res) => {
   const { username, email, password } = req.body;
   const { error } = superAdminSchema.validate(req.body);
   if (error) {
@@ -16,27 +17,28 @@ export const superAdmin = async (req, res) => {
   }
 
   try {
-    const existingSuperAdmin = await Admin.findOne({ email });
+    const existingSuperAdmin = await User.findOne({ email });
     if (existingSuperAdmin) {
       return res.status(400).json({ error: "Email already in use" });
     }
-    const existingUsername = await Admin.findOne({ username });
+    const existingUsername = await User.findOne({ username });
     if (existingUsername) {
       return res.status(400).json({ error: "Username already in use" });
     }
     const hashedPassword = await doHash(password, 10); // Replace with actual hashing logic
-    const superAdmin = new Admin({
+    const superAdmin = new User({
       username,
       email,
       password: hashedPassword,
+      role: "admin",
     });
     const result = await superAdmin.save();
     result.password = undefined;
     res.status(201).json({
       success: true,
-      message: "SuperAdmin created successfully",
+      message: "Admin created successfully",
       result,
-      role: Admin.role,
+      role: result.role,
     });
   } catch (err) {
     console.log(err);
@@ -50,16 +52,27 @@ export const loginAdmin = async (req, res) => {
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
   }
-  const existingSuperAdmin = await Admin.findOne({ email }).select("+password");
+  const existingSuperAdmin = await User.findOne({ email }).select(
+    "+password +role"
+  );
   if (!existingSuperAdmin) {
     return res.status(400).json({ error: "Invalid email or password" });
   }
+
   const isPasswordValid = await doHashValidation(
     password,
     existingSuperAdmin.password
   );
   if (!isPasswordValid) {
     return res.status(400).json({ error: "Invalid email or password" });
+  }
+  console.log("Logging in user role:", User.role);
+  console.log(User);
+
+  if (!["admin", "superadmin"].includes(existingSuperAdmin.role)) {
+    return res
+      .status(403)
+      .json({ message: "You are not allowed to login here" });
   }
 
   const accessToken = generateAccessToken(existingSuperAdmin);
@@ -79,7 +92,7 @@ export const loginAdmin = async (req, res) => {
     accessToken,
     superUser: {
       email: existingSuperAdmin.email,
-      role: Admin.role,
+      role: existingSuperAdmin.role,
     },
   });
 };

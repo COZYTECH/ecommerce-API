@@ -11,6 +11,7 @@ export const adminDataSchema = new mongoose.Schema(
       max: 30,
       lowercase: true,
     },
+
     email: {
       type: String,
       required: true,
@@ -26,7 +27,7 @@ export const adminDataSchema = new mongoose.Schema(
       select: false,
     },
     refreshToken: { type: String },
-    role: { type: String, enum: ["user", "admin"], default: "admin" },
+    role: { type: String, enum: ["admin", "superadmin"], default: "admin" },
   },
   { timestamps: true }
 );
