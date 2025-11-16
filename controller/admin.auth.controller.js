@@ -36,7 +36,7 @@ export const createAdmin = async (req, res) => {
     result.password = undefined;
     res.status(201).json({
       success: true,
-      message: "SuperAdmin created successfully",
+      message: "Admin created successfully",
       result,
       role: result.role,
     });
@@ -79,7 +79,7 @@ export const loginAdmin = async (req, res) => {
   const refreshToken = generateRefreshToken(existingSuperAdmin);
 
   existingSuperAdmin.refreshToken = refreshToken;
-  await existingSuperAdmin.save({ validateBeforeSave: false });
+  await existingSuperAdmin.save();
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
