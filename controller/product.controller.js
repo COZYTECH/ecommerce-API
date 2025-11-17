@@ -139,26 +139,45 @@ export const updateProduct = async (req, res) => {
 
     if (req.files && req.files.length > 0) {
       // delete old cloudinary files
-      for (const img of product.images) {
-        await cloudinary.uploader.destroy(img.public_id);
-      }
+      const oldImages = product.images;
 
       imagesArray = [];
 
       for (const file of req.files) {
-        const uploaded = await cloudinary.uploader.upload(file.path, {
-          folder: "products",
-        });
+        const uploaded = await uploadToCloudinary(file.buffer, "products");
         imagesArray.push({
           url: uploaded.secure_url,
           public_id: uploaded.public_id,
         });
       }
+      for (const img of oldImages) {
+        await cloudinary.uploader.destroy(img.public_id);
+      }
     }
+    //To prevent a mass assignment vulnerability in updateProduct, explicitly define
+    // an updateData object with only the fields permitted for user updates, instead of
+    // using { ...req.body }.
+    const { name, description, price, category, countInStock, brand } =
+      req.body;
+    const updateData = {
+      name,
+      description,
+      price,
+      category,
+      countInStock,
+      brand,
+      images: imagesArray,
+    };
+
+    // Filter out undefined fields so they don't overwrite existing data
+    Object.keys(updateData).forEach(
+      (key) => updateData[key] === undefined && delete updateData[key]
+    );
 
     product = await Product.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, images: imagesArray },
+      //   { ...req.body, images: imagesArray },
+      { $set: updateData },
       { new: true }
     );
 
