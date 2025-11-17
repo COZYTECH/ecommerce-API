@@ -7,6 +7,32 @@ const productSchema = new mongoose.Schema(
     price: { type: Number, required: true },
     category: { type: String, required: true },
     countInStock: { type: Number, required: true, default: 0 },
+    images: [
+      {
+        url: String,
+        public_id: String, // for cloudinary delete operations
+      },
+    ],
+    brand: {
+      type: String,
+      trim: true,
+    },
+
+    rating: {
+      type: Number,
+      default: 0,
+    },
+
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
+
+    // createdBy: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "User",
+    //   required: true,
+    // },
     //  image: { type: String, required: true },
   },
   { timestamps: true }
