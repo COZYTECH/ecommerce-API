@@ -8,6 +8,7 @@ import doHash from "../lib/hash.js";
 import { doHashValidation } from "../lib/hash.js";
 import { generateAccessToken, generateRefreshToken } from "../lib/jwt.js";
 import { verifyAccessToken, verifyRefreshToken } from "../lib/jwt.js";
+import { redis } from "../util/redis.js";
 
 export const register = async (req, res) => {
   // Registration logic here
@@ -73,10 +74,17 @@ export const Login = async (req, res) => {
     }
     //existingUser.password = undefined;
     const accessToken = generateAccessToken(existingUser);
-    const refreshToken = generateRefreshToken(existingUser);
+    const refreshToken = await generateRefreshToken(existingUser);
 
-    existingUser.refreshToken = refreshToken;
-    await existingUser.save();
+    await redis.set(
+      `refresh:${existingUser._id}`,
+      refreshToken,
+      "EX",
+      7 * 24 * 60 * 60 // 7 days
+    );
+
+    // existingUser.refreshToken = refreshToken;
+    // await existingUser.save();
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
@@ -121,13 +129,35 @@ export const refresh = async (req, res) => {
 
   try {
     const payload = verifyRefreshToken(token);
-    const user = await User.findById(payload.userId).select("+refreshToken");
+    const userId = payload.userId;
+    //const user = await User.findById(payload.userId).select("+refreshToken");
     //const user = await User.findById(payload.userId);
-    if (!user || user.refreshToken !== token)
+    // if (!user || user.refreshToken !== token)
+    //   return res.status(403).json({ error: "Invalid refresh token" });
+    const storedToken = await redis.get(`refresh:${userId}`);
+    if (!storedToken || storedToken !== token) {
       return res.status(403).json({ error: "Invalid refresh token" });
+    }
 
-    const accessToken = generateAccessToken(user);
-    res.json({ accessToken });
+    // const accessToken = generateAccessToken(cser);
+    // res.json({ accessToken });
+    const newRefreshToken = generateRefreshToken({ _id: userId });
+
+    await redis.set(
+      `refresh:${userId}`,
+      newRefreshToken,
+      "EX",
+      7 * 24 * 60 * 60
+    );
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+    });
+
+    const newAccessToken = generateAccessToken({ _id: userId });
+    return res.json({ accessToken: newAccessToken });
   } catch (err) {
     return res.status(403).json({ error: "Invalid token" });
   }
@@ -165,4 +195,83 @@ export const changePassword = async (req, res) => {
     console.error(err);
     return res.status(500).json({ error: "Server error" });
   }
+};
+
+// export const logout = async (req, res) => {
+//   // const token = req.cookies.refreshToken;
+//   // if (!token) return res.status(400).json({ error: "No token provided" });
+//   // try {
+//   //   const payload = verifyRefreshToken(token);
+//   //   const user = await User.findById(payload.userId).select("+refreshToken");
+//   //   if (!user || user.refreshToken !== token)
+//   //     return res.status(403).json({ error: "Invalid refresh token" });
+//   //   user.refreshToken = null;
+//   //   await user.save();
+//   //   res.clearCookie("refreshToken", {
+//   //     httpOnly: true,
+//   //     secure: process.env.NODE_ENV === "production",
+//   //     sameSite: "Strict",
+//   //   });
+//   //   res.json({ success: true, message: "Logged out successfully" });
+//   // } catch (err) {
+//   //   console.error(err);
+//   //   return res.status(500).json({ error: "Server error" });
+//   // }
+
+//   try {
+//     // const token = req.token; // extracted from auth middleware
+//     // const decoded = req.user; // user decoded
+
+//     // // Blacklist access token
+//     // await redis.set(`bl_${decoded.sessionId}`, "1", {
+//     //   EX: decoded.exp - Math.floor(Date.now() / 1000),
+//     // });
+
+//     // // Remove refresh token
+//     // await redis.del(`refresh:${decoded.userId}`);
+
+//     // return res.json({ message: "Logged out successfully" });
+
+//     const token = req.cookies.refreshToken;
+
+//     if (token) {
+//       try {
+//         const payload = verifyRefreshToken(token);
+//         await redis.del(`refresh:${payload.userId}`);
+//       } catch (err) {
+//         console.error("Error during logout:", err);
+//       }
+//     }
+
+//     res.clearCookie("refreshToken");
+//     res.json({ message: "Logged out successfully" });
+//   } catch (err) {
+//     res.status(500).json({ error: "Logout error" });
+//   }
+// };
+
+export const logout = async (req, res) => {
+  const token = req.cookies.refreshToken;
+
+  if (!token) {
+    return res
+      .status(200)
+      .json({ message: "No refresh token found, already logged out" });
+  }
+  try {
+    const payload = verifyRefreshToken(token); // await if async
+    if (payload && payload.userId) {
+      await redis.del(`refresh:${payload.userId.toString()}`);
+    }
+  } catch (err) {
+    console.error("Logout error:", err.message);
+  }
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+
+  res.status(200).json({ message: "Logged out successfully" });
 };
