@@ -76,12 +76,12 @@ export const Login = async (req, res) => {
     const accessToken = generateAccessToken(existingUser);
     const refreshToken = await generateRefreshToken(existingUser);
 
-    await redis.set(
-      `refresh:${existingUser._id}`,
-      refreshToken,
-      "EX",
-      7 * 24 * 60 * 60 // 7 days
-    );
+    // await redis.set(
+    //   `refresh:${existingUser._id}`,
+    //   refreshToken,
+    //   "EX",
+    //   7 * 24 * 60 * 60 // 7 days
+    // );
 
     // existingUser.refreshToken = refreshToken;
     // await existingUser.save();
@@ -129,7 +129,8 @@ export const refresh = async (req, res) => {
 
   try {
     const payload = verifyRefreshToken(token);
-    const userId = payload.userId;
+    //const userId = payload.userId;
+    const { userId, email, role } = payload;
     //const user = await User.findById(payload.userId).select("+refreshToken");
     //const user = await User.findById(payload.userId);
     // if (!user || user.refreshToken !== token)
@@ -141,22 +142,24 @@ export const refresh = async (req, res) => {
 
     // const accessToken = generateAccessToken(cser);
     // res.json({ accessToken });
-    const newRefreshToken = generateRefreshToken({ _id: userId });
 
-    await redis.set(
-      `refresh:${userId}`,
-      newRefreshToken,
-      "EX",
-      7 * 24 * 60 * 60
-    );
+    const newRefreshToken = await generateRefreshToken({
+      _id: userId,
+      email,
+      role,
+    });
 
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
     });
-
-    const newAccessToken = generateAccessToken({ _id: userId });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const newAccessToken = generateAccessToken(user);
+    //const newAccessToken = generateAccessToken({ _id: userId });
     return res.json({ accessToken: newAccessToken });
   } catch (err) {
     return res.status(403).json({ error: "Invalid token" });
@@ -250,28 +253,47 @@ export const changePassword = async (req, res) => {
 //   }
 // };
 
+// export const logout = async (req, res) => {
+//   const token = req.cookies.refreshToken;
+
+//   if (!token) {
+//     return res
+//       .status(200)
+//       .json({ message: "No refresh token found, already logged out" });
+//   }
+//   try {
+//     const payload = verifyRefreshToken(token); // await if async
+//     if (payload && payload.userId) {
+//       await redis.del(`refresh:${payload.userId.toString()}`);
+//     }
+//   } catch (err) {
+//     console.error("Logout error:", err.message);
+//   }
+
+//   res.clearCookie("refreshToken", {
+//     httpOnly: true,
+//     secure: process.env.NODE_ENV === "production",
+//     sameSite: "Strict",
+//   });
+
+//   res.status(200).json({ message: "Logged out successfully" });
+// };
+
+// controller/auth.controller.js
 export const logout = async (req, res) => {
-  const token = req.cookies.refreshToken;
+  // Access token payload is available from verifyToken middleware
+  const { sessionId, exp, userId } = req.user;
 
-  if (!token) {
-    return res
-      .status(200)
-      .json({ message: "No refresh token found, already logged out" });
-  }
-  try {
-    const payload = verifyRefreshToken(token); // await if async
-    if (payload && payload.userId) {
-      await redis.del(`refresh:${payload.userId.toString()}`);
-    }
-  } catch (err) {
-    console.error("Logout error:", err.message);
+  // 1. Blacklist the access token
+  const expiry = exp - Math.floor(Date.now() / 1000);
+  if (expiry > 0) {
+    await redis.set(`bl_${sessionId}`, "1", { EX: expiry });
   }
 
-  res.clearCookie("refreshToken", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "Strict",
-  });
+  // 2. Delete the refresh token
+  await redis.del(`refresh:${userId}`);
 
+  // 3. Clear the cookie
+  res.clearCookie("refreshToken");
   res.status(200).json({ message: "Logged out successfully" });
 };

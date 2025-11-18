@@ -14,7 +14,10 @@ export const verifyToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, ENV.JWT_SECRET);
-    const isBlacklisted = await redis.get(`bl_${decoded.sessionId}`);
+    //const isBlacklisted = await redis.get(`bl_${decoded.sessionId}`);
+    await redis.set(`bl_${decoded.sessionId}`, "1", {
+      EX: 15 * 60, // match access token TTL
+    });
     if (isBlacklisted) {
       return res.status(401).json({ error: "Token is invalid (logged out)" });
     }
