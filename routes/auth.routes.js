@@ -4,6 +4,7 @@ import {
   register,
   refresh,
   changePassword,
+  logout,
 } from "../controller/auth.controller.js";
 import { verifyToken } from "../middleware/verify.token.js";
 import authorizeRoles from "../middleware/admin.verification.js";
@@ -15,5 +16,6 @@ router.post("/register", register);
 router.post("/login", Login);
 router.get("/refresh", refresh);
 router.post("/change-password", verifyToken, changePassword);
+router.post("/logout", verifyToken, logout);
 
 export default router;

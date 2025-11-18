@@ -76,7 +76,7 @@ export const loginAdmin = async (req, res) => {
   }
 
   const accessToken = generateAccessToken(existingSuperAdmin);
-  const refreshToken = generateRefreshToken(existingSuperAdmin);
+  const refreshToken = await generateRefreshToken(existingSuperAdmin);
 
   existingSuperAdmin.refreshToken = refreshToken;
   await existingSuperAdmin.save();
