@@ -8,6 +8,8 @@ import { doHashValidation } from "../lib/hash.js";
 import { generateAccessToken } from "../lib/jwt.js";
 import { generateRefreshToken } from "../lib/jwt.js";
 import User from "../models/user.model.js";
+import { v4 as uuidv4 } from "uuid";
+import { redis } from "../util/redis.js";
 
 export const createAdmin = async (req, res) => {
   const { username, email, password } = req.body;
@@ -48,6 +50,7 @@ export const createAdmin = async (req, res) => {
 
 export const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
+  const sessionId = uuidv4();
   const { error } = loginSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
@@ -75,11 +78,23 @@ export const loginAdmin = async (req, res) => {
       .json({ message: "You are not allowed to login here" });
   }
 
-  const accessToken = generateAccessToken(existingSuperAdmin);
-  const refreshToken = await generateRefreshToken(existingSuperAdmin);
+  const accessToken = generateAccessToken(existingSuperAdmin, sessionId);
+  const refreshToken = await generateRefreshToken(
+    existingSuperAdmin,
+    sessionId
+  );
+  await redis.set(
+    `refresh:${existingSuperAdmin._id}`,
+    refreshToken,
+    "EX",
+    7 * 24 * 60 * 60 // 7 days
+  );
+  await redis.set(`access:${sessionId}`, "valid", {
+    EX: 15 * 60, // 15 minutes
+  });
 
-  existingSuperAdmin.refreshToken = refreshToken;
-  await existingSuperAdmin.save();
+  // existingSuperAdmin.refreshToken = refreshToken;
+  // await existingSuperAdmin.save();
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,

@@ -14,4 +14,5 @@ export const ENV = {
   REDIS_PORT: process.env.REDIS_PORT,
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
+  CART_COOKIE_NAME: process.env.CART_COOKIE_NAME,
 };
