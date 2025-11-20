@@ -9,6 +9,9 @@ import { doHashValidation } from "../lib/hash.js";
 import { generateAccessToken, generateRefreshToken } from "../lib/jwt.js";
 import { verifyAccessToken, verifyRefreshToken } from "../lib/jwt.js";
 import { redis } from "../util/redis.js";
+import { v4 as uuidv4 } from "uuid";
+import { ENV } from "../config/env.config.js";
+import * as CartService from "../util/cartService.js";
 
 export const register = async (req, res) => {
   // Registration logic here
@@ -54,6 +57,7 @@ export const register = async (req, res) => {
 export const Login = async (req, res) => {
   // Login logic here
   const { email, password } = req.body;
+  const sessionId = uuidv4();
   const { error } = loginSchema.validate(req.body);
   if (error) {
     return res.status(400).json({ error: error.details[0].message });
@@ -73,16 +77,18 @@ export const Login = async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password" });
     }
     //existingUser.password = undefined;
-    const accessToken = generateAccessToken(existingUser);
-    const refreshToken = await generateRefreshToken(existingUser);
+    const accessToken = generateAccessToken(existingUser, sessionId);
+    const refreshToken = await generateRefreshToken(existingUser, sessionId);
 
-    // await redis.set(
-    //   `refresh:${existingUser._id}`,
-    //   refreshToken,
-    //   "EX",
-    //   7 * 24 * 60 * 60 // 7 days
-    // );
-
+    await redis.set(
+      `refresh:${existingUser._id}`,
+      refreshToken,
+      "EX",
+      7 * 24 * 60 * 60 // 7 days
+    );
+    await redis.set(`access:${sessionId}`, "valid", {
+      EX: 15 * 60, // 15 minutes
+    });
     // existingUser.refreshToken = refreshToken;
     // await existingUser.save();
 
@@ -93,13 +99,63 @@ export const Login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    // const userCartKey = `cart:${existingUser._id}`;
+
+    // if (guestCartKey) {
+    //   const guestCart = await getCartFromRedis(guestCartKey);
+    //   const userCart = await getCartFromRedis(userCartKey);
+
+    //   const mergedItems = mergeCarts(guestCart, userCart);
+    //   const mergedCart = { items: mergedItems };
+
+    //   await saveCartToRedis(userCartKey, mergedCart);
+
+    //   // Optionally, remove guest cart
+    //   await clearCart(guestCartKey);
+    // }
+    // require cart middleware BEFORE this controller runs
+
+    //const guestCartKey = req.cookies?.cartId;
+    const guestCartKey = req.cookies?.cartId
+      ? `cart:guest:${req.cookies.cartId}`
+      : null;
+    const userCartKey = `cart:user:${existingUser._id}`;
+    let mergedCart = { items: [] };
+
+    if (guestCartKey) {
+      // 1. Get guest cart from Redis
+      const guestCart = await CartService.getCartFromRedis(guestCartKey);
+
+      // 2. Load user cart from Mongo to Redis
+      await CartService.loadUserCartToRedis(existingUser._id);
+      const userCart = await CartService.getCartFromRedis(userCartKey);
+
+      // 3. Merge carts
+      const mergedItems = CartService.mergeCartsItems(guestCart, userCart);
+      const mergedCart = { items: mergedItems };
+
+      // 4. Save merged cart to Redis & Mongo
+      await CartService.saveCartToRedis(userCartKey, mergedCart);
+      await CartService.persistCartToMongo(existingUser._id, mergedCart);
+
+      // 5. Delete guest cart and cookie
+      //await redis.del(`cart:guest:${guestCartKey}`);
+      await redis.del(guestCartKey);
+
+      res.clearCookie("cartId");
+    }
+    // **Update req.cartKey and cookie to user cart**
+    req.cartKey = userCartKey;
+
     res.json({
       accessToken,
       user: {
         email: existingUser.email,
         username: existingUser.username,
-        role: User.role,
+        role: existingUser.role,
       },
+      cart: mergedCart,
+      //cart: mergedCart || (await getCartFromRedis(`cart:${existingUser._id}`)),
     });
 
     // const token = jwt.sign(
