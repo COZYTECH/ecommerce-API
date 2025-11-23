@@ -7,11 +7,30 @@ import { ENV } from "../config/env.config.js";
 //   password: ENV.REDIS_PASSWORD,
 // });
 
+// import { createClient } from "redis";
+
+// export const redis = createClient({
+//   url: ENV.REDIS_PORT,
+// });
+
+// redis.on("error", (err) => console.error("Redis Error:", err));
+// await redis.connect();
+
 import { createClient } from "redis";
 
 export const redis = createClient({
-  url: ENV.REDIS_PORT,
+  username: "default",
+  password: ENV.REDIS_PASSWORD,
+  socket: {
+    host: ENV.REDIS_HOST,
+    port: ENV.REDIS_PORT,
+  },
 });
 
-redis.on("error", (err) => console.error("Redis Error:", err));
+redis.on("error", (err) => console.log("Redis Client Error", err));
+
 await redis.connect();
+
+await redis.set("foo", "bar");
+const result = await redis.get("foo");
+console.log(result); // >>> bar
