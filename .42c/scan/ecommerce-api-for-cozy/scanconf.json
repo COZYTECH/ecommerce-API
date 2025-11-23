@@ -1,0 +1,1107 @@
+{
+  "version": "2.0.0",
+  "runtimeConfiguration": {
+    "environment": "default",
+    "laxTestingModeEnabled": false,
+    "apiConnectivityCheck": true,
+    "logLevel": "error",
+    "logDestination": "stdout+platform",
+    "logMaxFileSize": 2147483648,
+    "requestHeaderNameRequestId": "x-scan-request-id",
+    "requestHeaderNameScenarioId": "x-scan-scenario-id",
+    "requestHeaderNameRequestType": "x-scan-request-type",
+    "requestFlowrate": 100,
+    "requestTimeout": 30,
+    "requestTlsInsecureSkipVerify": true,
+    "responseFollowRedirection": false,
+    "responseMaxBodySizeScan": 10485760,
+    "happyPathOnly": false,
+    "maxRequestRetryAttempts": 5,
+    "maxScanDuration": 1800,
+    "memoryLimit": 2147483648,
+    "memoryTimeSpan": 10,
+    "reportMaxRequestSizeHappyPath": 8092,
+    "reportMaxRequestSizeTest": 8092,
+    "reportIncludeRequestBody": true,
+    "reportIncludeResponseBody": true,
+    "reportMaxHttpResponseSizeHappyPath": 8092,
+    "reportMaxBodySizeHappyPath": 8092,
+    "reportMaxHttpResponseSizeTest": 8092,
+    "reportMaxBodySizeTest": 8092,
+    "reportIssuesOnly": false,
+    "reportMaxIssues": 1000,
+    "reportMaxSize": 20971520,
+    "reportGenerateCurlCommand": true,
+    "normalizeServerUrls": true
+  },
+  "customizations": {
+    "happyPaths": {
+      "retry": 1,
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      },
+      "httpStatusExpected": []
+    },
+    "tests": {
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      }
+    }
+  },
+  "environments": {
+    "default": {
+      "variables": {
+        "bearerAuth": {
+          "name": "SCAN42C_SECURITY_BEARERAUTH",
+          "from": "environment",
+          "required": true
+        },
+        "host": {
+          "name": "SCAN42C_HOST",
+          "from": "environment",
+          "required": true,
+          "default": "http://localhost:3000/api"
+        }
+      }
+    }
+  },
+  "operations": {
+    "/auth/change-password:post": {
+      "operationId": "/auth/change-password:post",
+      "request": {
+        "operationId": "/auth/change-password:post",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/auth/change-password:post",
+            "method": "POST",
+            "url": "{{host}}/auth/change-password",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "newPassword": "jcanxqowtszfbmwvljyzaaikfdfwekpu",
+                "oldPassword": "cfkybckdpmklnszsjjbifyfblybokhqy"
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1auth~1change-password:post/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/auth/login:post": {
+      "operationId": "/auth/login:post",
+      "request": {
+        "operationId": "/auth/login:post",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/auth/login:post",
+            "method": "POST",
+            "url": "{{host}}/auth/login",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "email": "john@example.com",
+                "password": "password123"
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1auth~1login:post/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/auth/logout:post": {
+      "operationId": "/auth/logout:post",
+      "request": {
+        "operationId": "/auth/logout:post",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/auth/logout:post",
+            "method": "POST",
+            "url": "{{host}}/auth/logout"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1auth~1logout:post/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/auth/refresh:get": {
+      "operationId": "/auth/refresh:get",
+      "request": {
+        "operationId": "/auth/refresh:get",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/auth/refresh:get",
+            "method": "GET",
+            "url": "{{host}}/auth/refresh"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1auth~1refresh:get/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/auth/register:post": {
+      "operationId": "/auth/register:post",
+      "request": {
+        "operationId": "/auth/register:post",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/auth/register:post",
+            "method": "POST",
+            "url": "{{host}}/auth/register",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "email": "john@example.com",
+                "password": "password123",
+                "username": "johnDoe"
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          },
+          "400": {
+            "expectations": {
+              "httpStatus": 400
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1auth~1register:post/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/cart/add:post": {
+      "operationId": "/cart/add:post",
+      "request": {
+        "operationId": "/cart/add:post",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/cart/add:post",
+            "method": "POST",
+            "url": "{{host}}/cart/add",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "productId": "gwgljevfsrzipesoxqhtafglstkhsqwe",
+                "quantity": 947626425124669300
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1cart~1add:post/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/cart/update:put": {
+      "operationId": "/cart/update:put",
+      "request": {
+        "operationId": "/cart/update:put",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/cart/update:put",
+            "method": "PUT",
+            "url": "{{host}}/cart/update",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "productId": "snwrorczwwjvnfsnesljqvwnaoimydab",
+                "quantity": 8813127854156254000
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1cart~1update:put/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/cart/view:get": {
+      "operationId": "/cart/view:get",
+      "request": {
+        "operationId": "/cart/view:get",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/cart/view:get",
+            "method": "GET",
+            "url": "{{host}}/cart/view"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1cart~1view:get/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/orders/{id}:delete": {
+      "operationId": "/orders/{id}:delete",
+      "request": {
+        "operationId": "/orders/{id}:delete",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/orders/{id}:delete",
+            "method": "DELETE",
+            "url": "{{host}}/orders/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "agsglrpzqmahlevqaodkxvsmkhfduvra"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1orders~1{id}:delete/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/orders/{id}:get": {
+      "operationId": "/orders/{id}:get",
+      "request": {
+        "operationId": "/orders/{id}:get",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/orders/{id}:get",
+            "method": "GET",
+            "url": "{{host}}/orders/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "rskzxynkpbugpionhldqmymkwnohnfrt"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1orders~1{id}:get/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/orders:get": {
+      "operationId": "/orders:get",
+      "request": {
+        "operationId": "/orders:get",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/orders:get",
+            "method": "GET",
+            "url": "{{host}}/orders"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1orders:get/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/orders:post": {
+      "operationId": "/orders:post",
+      "request": {
+        "operationId": "/orders:post",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/orders:post",
+            "method": "POST",
+            "url": "{{host}}/orders",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "items": [
+                  {
+                    "productId": "ahrhscmqzdrdtfgntcxllddsaleupbmg",
+                    "quantity": 3839514295248620500
+                  },
+                  {
+                    "productId": "ahrhscmqzdrdtfgntcxllddsaleupbmg",
+                    "quantity": 3839514295248620500
+                  },
+                  {
+                    "productId": "ahrhscmqzdrdtfgntcxllddsaleupbmg",
+                    "quantity": 3839514295248620500
+                  }
+                ],
+                "userId": "visopsojocuyqcqkxzqscwvupodtmsvw"
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1orders:post/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/products/{id}:delete": {
+      "operationId": "/products/{id}:delete",
+      "request": {
+        "operationId": "/products/{id}:delete",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/products/{id}:delete",
+            "method": "DELETE",
+            "url": "{{host}}/products/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "nfjwvegfikmrisetmufyzrgywrxmmktr"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1products~1{id}:delete/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/products/{id}:get": {
+      "operationId": "/products/{id}:get",
+      "request": {
+        "operationId": "/products/{id}:get",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/products/{id}:get",
+            "method": "GET",
+            "url": "{{host}}/products/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "gzbpslxhgdcohlqbaggietemxatfngab"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1products~1{id}:get/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/products/{id}:put": {
+      "operationId": "/products/{id}:put",
+      "request": {
+        "operationId": "/products/{id}:put",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/products/{id}:put",
+            "method": "PUT",
+            "url": "{{host}}/products/{id}",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "paths": [
+              {
+                "key": "id",
+                "value": "dhcjxmrlqxsocylrfimhwuxmwamugsie"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "category": "pemltfsngfbuedqvkqgcnyuybmusjeko",
+                "description": "obupdohmmjuqiaozysejxilbbsvttene",
+                "name": "xvgatqaxtzbpwwbxhdryiqktqlgsnjqd",
+                "price": 2.0767297997781374e+38
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1products~1{id}:put/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/products:get": {
+      "operationId": "/products:get",
+      "request": {
+        "operationId": "/products:get",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/products:get",
+            "method": "GET",
+            "url": "{{host}}/products"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1products:get/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/products:post": {
+      "operationId": "/products:post",
+      "request": {
+        "operationId": "/products:post",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/products:post",
+            "method": "POST",
+            "url": "{{host}}/products",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "category": "pemltfsngfbuedqvkqgcnyuybmusjeko",
+                "description": "obupdohmmjuqiaozysejxilbbsvttene",
+                "name": "xvgatqaxtzbpwwbxhdryiqktqlgsnjqd",
+                "price": 2.0767297997781374e+38
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1products:post/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/users/{id}:delete": {
+      "operationId": "/users/{id}:delete",
+      "request": {
+        "operationId": "/users/{id}:delete",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/users/{id}:delete",
+            "method": "DELETE",
+            "url": "{{host}}/users/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "aecnatjxueavorlafddwgvespjmllbde"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1users~1{id}:delete/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/users/{id}:get": {
+      "operationId": "/users/{id}:get",
+      "request": {
+        "operationId": "/users/{id}:get",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/users/{id}:get",
+            "method": "GET",
+            "url": "{{host}}/users/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "sbzpqnpahdotjoqrwmewyhjnlpnxjyvj"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1users~1{id}:get/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/users/{id}:put": {
+      "operationId": "/users/{id}:put",
+      "request": {
+        "operationId": "/users/{id}:put",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/users/{id}:put",
+            "method": "PUT",
+            "url": "{{host}}/users/{id}",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "paths": [
+              {
+                "key": "id",
+                "value": "zoybwsyjnwjeimzbeogqbpbedxrcmumc"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "email": "pijnijdddqzklklykikwqjgxwvzkptal",
+                "id": "ptlakbbdkysrodnemkrjvoanxkayetvb",
+                "role": "user",
+                "username": "ghtfvxrdujvfnacpqgwsnpiwtaymancs"
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1users~1{id}:put/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/users:get": {
+      "operationId": "/users:get",
+      "request": {
+        "operationId": "/users:get",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/users:get",
+            "method": "GET",
+            "url": "{{host}}/users"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1users:get/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "/users:post": {
+      "operationId": "/users:post",
+      "request": {
+        "operationId": "/users:post",
+        "auth": [
+          "bearerAuth"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "/users:post",
+            "method": "POST",
+            "url": "{{host}}/users",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "email": "john@example.com",
+                "password": "password123",
+                "username": "johnDoe"
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/~1users:post/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    }
+  },
+  "authenticationDetails": [
+    {
+      "bearerAuth": {
+        "type": "bearer",
+        "default": "bearerAuth",
+        "credentials": {
+          "bearerAuth": {
+            "credential": "{{bearerAuth}}",
+            "description": "bearerAuth security"
+          }
+        }
+      },
+      "SCAN42C_SECURITY_BEARERAUTH": {
+        "type": "bearer",
+        "default": "SCAN42C_SECURITY_BEARERAUTH",
+        "credentials": {
+          "SCAN42C_SECURITY_BEARERAUTH": {
+            "credential": "{{SCAN42C_SECURITY_BEARERAUTH}}",
+            "description": "SCAN42C_SECURITY_BEARERAUTH security"
+          }
+        }
+      }
+    }
+  ]
+}
