@@ -11,6 +11,7 @@ import { verifyToken } from "../middleware/verify.token.js";
 import upload from "../middleware/multer.js";
 
 const router = express.Router();
+router.get("/get-products", verifyToken, getProducts);
 router.post(
   "/create-product",
   verifyToken,
@@ -18,7 +19,7 @@ router.post(
   upload.array("images", 10),
   createProduct
 );
-router.get("/get-products", verifyToken, getProducts);
+
 router.get("/get-productsbyId/:id", verifyToken, getProductById);
 router.put(
   "/update-product/:id",

@@ -1,31 +1,35 @@
 {
   "name": "ecommerceapi",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
+    "version": "1.0.0",
+      "description": "",
+        "main": "index.js",
+          "scripts": {
     "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+      "dev": "node index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "dependencies": {
+    "author": "",
+      "license": "ISC",
+        "type": "module",
+          "dependencies": {
     "bcrypt": "^6.0.0",
-    "body-parser": "^2.2.0",
-    "cloudinary": "^2.8.0",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "hash": "^0.2.1",
-    "joi": "^18.0.1",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.19.3",
-    "multer": "^2.0.2",
-    "nodemon": "^3.1.10",
-    "redis": "^5.9.0",
-    "uuid": "^13.0.0"
+      "body-parser": "^2.2.0",
+        "cloudinary": "^2.8.0",
+          "cookie-parser": "^1.4.7",
+            "cors": "^2.8.5",
+              "dotenv": "^17.2.3",
+                "express": "^5.1.0",
+                  "hash": "^0.2.1",
+                    "joi": "^18.0.1",
+                      "jsonwebtoken": "^9.0.2",
+                        "mongoose": "^8.19.3",
+                          "multer": "^2.0.2",
+                            "nodemon": "^3.1.10",
+                              "redis": "^5.9.0",
+                                "swagger-jsdoc": "^6.2.8",
+                                  "swagger-ui-express": "^5.0.1",
+                                    "uuid": "^13.0.0",
+                                      "yamljs": "^0.3.0"
   }
 }
