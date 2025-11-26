@@ -4,7 +4,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:3000/api
+  - url: https://ecommerce-api-nsad.onrender.com/api
 
 tags:
   - name: Auth
@@ -169,7 +169,7 @@ paths:
           description: User deleted
 
   # Products
-  /get-products:
+  /products/get-products:
     get:
       tags: [Products]
       summary: Get all products
@@ -184,6 +184,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Product"
+
+  /products/create-product:
     post:
       tags: [Products]
       summary: Create a new product
