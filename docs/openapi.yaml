@@ -4,7 +4,8 @@ info:
   version: 1.0.0
 
 servers:
-  - url: https://ecommerce-api-nsad.onrender.com/api
+  # - url: https://ecommerce-api-nsad.onrender.com/api
+  - url: http://localhost:3000/api
 
 tags:
   - name: Auth
@@ -254,6 +255,29 @@ paths:
       responses:
         200:
           description: Product deleted
+
+  #rating
+  /products/{productId}/review:
+    post:
+      tags: [review]
+      summary: Add review
+      security:
+        - SCAN42C_SECURITY_BEARERAUTH: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/rating"
+      responses:
+        200:
+          description: review added
 
   # Cart
   /cart/view:
@@ -511,6 +535,20 @@ components:
           type: string
         quantity:
           type: integer
+
+    #rating
+    rating:
+      type: object
+      required:
+        - rating
+        - comment
+      properties:
+        rating:
+          type: integer
+          example: 4
+        comment:
+          type: string
+          example: "Great product!"
 
     # Orders
     Order:

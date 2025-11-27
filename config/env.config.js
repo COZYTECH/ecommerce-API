@@ -15,4 +15,7 @@ export const ENV = {
   REDIS_HOST: process.env.REDIS_HOST,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD,
   CART_COOKIE_NAME: process.env.CART_COOKIE_NAME,
+  PAYPAL_CLIENT_ID: process.env.PAYPAL_CLIENT_ID,
+  PAYPAL_CLIENT_SECRET: process.env.PAYPAL_CLIENT_SECRET,
+  PAY_BASE_URL: process.env.PAY_BASE_URL,
 };
