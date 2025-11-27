@@ -12,6 +12,8 @@ import YAML from "yamljs";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
+import { getPayPalAccessToken } from "./util/paypalservice.js";
+import orderRoute from "./routes/order.route.js";
 
 await connectDB();
 
@@ -31,10 +33,17 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/cart", cartRoute);
+app.use("/api/order", orderRoute);
 //app.use("/api/products", (await import("./routes/create.product.route.js")).default);
 app.use("/api/products", productRoutes);
 app.get("/", (req, res) => {
   res.send("Hello, World!");
+});
+app.get("/sucesss", (req, res) => {
+  res.send("Hello, good");
+});
+app.get("/failure", (req, res) => {
+  res.send("Hello, bad");
 });
 
 app.listen(ENV.PORT, () => {

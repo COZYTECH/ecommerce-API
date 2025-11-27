@@ -4,7 +4,7 @@ import Review from "../models/review.model.js";
 
 export const addReview = async (req, res) => {
   try {
-    const { productId } = req.params;
+    const { productId } = req.params.productId;
     const { rating, comment } = req.body;
     const userId = req.user.id || req.user.userId;
 
