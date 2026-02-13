@@ -245,5 +245,4 @@ Server runs at `http://localhost:5000`.
 Senior Backend & Full-Stack | DevOps Engineer
 GitHub: [cozytech](https://github.com/cozytech)
 
-Portfolio: *(optional)*
 
